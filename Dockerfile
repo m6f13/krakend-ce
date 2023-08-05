@@ -16,9 +16,12 @@ LABEL maintainer="community@krakend.io"
 
 RUN apk add --no-cache ca-certificates tzdata && \
     adduser -u 1000 -S -D -H krakend && \
-    mkdir /etc/krakend && \
-    echo '{ "version": 3 }' > /etc/krakend/krakend.json
+    mkdir /etc/krakend
+    #echo '{ "version": 3 }' > /etc/krakend/krakend.json
 
+COPY --from=builder /app/plugins/server-plugin/krakend-server-example/* /etc/krakend/plugins/server-plugin/krakend-server-example/
+COPY --from=builder /app/plugins/server-plugin/krakend-server-ldap/* /etc/krakend/plugins/server-plugin/krakend-server-ldap/
+COPY --from=builder /app/my-krakend-01.json /etc/krakend/krakend.json
 COPY --from=builder /app/krakend /usr/bin/krakend
 
 USER 1000
