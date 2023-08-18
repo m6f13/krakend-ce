@@ -1,0 +1,28 @@
+{
+  "version": 3,
+  "plugin": {
+    "pattern": ".so",
+    "folder": "./plugins/client-plugin/krakend-client-example/"
+  },
+  "endpoints": [
+    {
+      "endpoint": "/test/{id}",
+      "backend": [
+        {
+          "host": [
+            "http://localhost:8080"
+          ],
+          "url_pattern": "/__debug/{id}",
+          "extra_config": {
+            "plugin/http-client": {
+              "name": "krakend-client-example",
+              "krakend-client-example": {
+                "path": "/__debug/hijack-me"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

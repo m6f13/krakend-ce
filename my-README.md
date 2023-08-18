@@ -1,4 +1,6 @@
-- links: https://www.krakend.io/docs/extending/http-server-plugins/
+- links: 
+- server plugins: https://www.krakend.io/docs/extending/http-server-plugins/
+- client plugins: https://www.krakend.io/docs/extending/http-client-plugins/
 
 used commands:
 ```shell
