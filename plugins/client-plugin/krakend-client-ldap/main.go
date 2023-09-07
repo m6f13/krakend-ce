@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-ldap/ldap/v3"
-	"html"
 	"io"
 	"net/http"
 )
@@ -67,7 +65,22 @@ func (r registerer) registerClients(_ context.Context, extra map[string]interfac
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 
 		if req.URL.Path == path {
+			for name, headers := range req.Header {
+				for _, h := range headers {
+					logger.Debug(fmt.Sprintf("%v: %v", name, h))
+				}
+			}
+
+			authHeader := req.Header.Get("Authorization")
+			logger.Debug("Authorization Header:", authHeader)
+
 			username, password, authOK := req.BasicAuth()
+
+			if !authOK {
+				logger.Error("[PLUGIN: ldap-auth] Invalid or missing Authorization header")
+				http.Error(w, "Invalid or missing Authorization header", http.StatusUnauthorized)
+				return
+			}
 
 			logger.Debug("***************************************")
 			logger.Debug("LDAP SECTION: calling to LDAP server...")
@@ -77,24 +90,17 @@ func (r registerer) registerClients(_ context.Context, extra map[string]interfac
 			logger.Debug("password: ", password)
 			logger.Debug("***************************************")
 
-			if !authOK {
-				logger.Error("[PLUGIN: ldap-auth] Invalid or missing Authorization header")
-				http.Error(w, "Invalid or missing Authorization header", http.StatusUnauthorized)
-				return
-			}
-
-			logger.Debug("[PLUGIN: ldap-auth] Extracted credentials: Username:", username, " Password:", password)
 			if !authenticateUser(ldapURI, baseDN, username, password) {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
 
-			w.Header().Add("Content-Type", "application/json")
-			// Return a custom JSON object:
-			res := map[string]string{"message": html.EscapeString(req.URL.Path)}
-			b, _ := json.Marshal(res)
-			w.Write(b)
-			logger.Debug("request:", html.EscapeString(req.URL.Path))
+			//w.Header().Add("Content-Type", "application/json")
+			//// Return a custom JSON object:
+			//res := map[string]string{"message": html.EscapeString(req.URL.Path)}
+			//b, _ := json.Marshal(res)
+			//w.Write(b)
+			//logger.Debug("request:", html.EscapeString(req.URL.Path))
 
 			return
 		}

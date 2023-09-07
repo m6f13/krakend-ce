@@ -1,0 +1,42 @@
+ARG GOLANG_VERSION
+FROM golang:${GOLANG_VERSION} as builder
+
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y make gcc binutils-gold && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY . /app
+WORKDIR /app
+
+# Upgrade the golang.org/x/crypto package
+# RUN go get -d -v golang.org/x/crypto@v0.13.0
+
+# RUN make build
+# RUN make build
+
+FROM ubuntu:latest
+
+LABEL maintainer="community@krakend.io"
+
+# Install needed packages
+RUN apt-get update && \
+    apt-get install -y ca-certificates tzdata && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    useradd -u 1000 -M krakend && \
+    mkdir /etc/krakend
+
+COPY --from=builder /app/plugins/client-plugin/krakend-client-ldap/* /etc/krakend/plugins/client-plugin/krakend-client-ldap/
+COPY --from=builder /app/my-krakend-03.json /etc/krakend/krakend.json
+COPY --from=builder /app/krakend /usr/bin/krakend
+
+USER 1000
+
+WORKDIR /etc/krakend
+
+ENTRYPOINT [ "/usr/bin/krakend" ]
+CMD [ "run", "-c", "/etc/krakend/krakend.json" ]
+
+EXPOSE 8000 8090

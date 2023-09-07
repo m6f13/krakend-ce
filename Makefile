@@ -71,6 +71,8 @@ build_on_docker: docker-builder-linux
 	docker run --rm -it -v "${PWD}:/app" -w /app krakend/builder:${VERSION}-linux-generic sh -c "git config --global --add safe.directory /app && make -e build"
 
 # Build the container using the Dockerfile (alpine)
+docker-myVersion:
+	docker build --no-cache --pull --build-arg GOLANG_VERSION=${GOLANG_VERSION} --build-arg ALPINE_VERSION=${ALPINE_VERSION} -t m6f13/krakend:${VERSION} -f Dockerfile-myVersion .
 docker:
 	docker build --no-cache --pull --build-arg GOLANG_VERSION=${GOLANG_VERSION} --build-arg ALPINE_VERSION=${ALPINE_VERSION} -t devopsfaith/krakend:${VERSION} .
 
