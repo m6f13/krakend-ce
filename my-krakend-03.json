@@ -1,0 +1,30 @@
+{
+  "version": 3,
+  "plugin": {
+    "pattern": ".so",
+    "folder": "./plugins/client-plugin/krakend-client-ldap/"
+  },
+  "endpoints": [
+    {
+      "endpoint": "/test/{id}",
+      "backend": [
+        {
+          "host": [
+            "http://localhost:8080"
+          ],
+          "url_pattern": "/__debug/{id}",
+          "extra_config": {
+            "plugin/http-client": {
+              "name": "krakend-client-ldap",
+              "krakend-client-ldap": {
+                "path": "/__debug/secured",
+                "ldap_uri": "http://openldap-service.ldap.svc.cluster.local",
+                "base_dn": "cn=admin,dc=proconion,dc=com"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
